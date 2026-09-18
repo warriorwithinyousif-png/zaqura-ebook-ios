@@ -1,12 +1,12 @@
 {
-    "name": "myapp",
-    "short_name": "myapp",
+    "name": "التربية الإسلامية - مدرسة الزقورة",
+    "short_name": "التربية الإسلامية",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#FFFFFF",
+    "theme_color": "#3DDC84",
+    "description": "تطبيق التربية الإسلامية والقرآن الكريم - مدرسة الزقورة الابتدائية المختلطة",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

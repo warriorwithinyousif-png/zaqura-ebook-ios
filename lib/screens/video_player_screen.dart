@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:myapp/models/video.dart';
@@ -20,11 +21,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
 
-    _controller = VideoPlayerController.file(File(widget.video.path))
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.play();
-      });
+    final isNetworkOrWeb = kIsWeb ||
+        widget.video.path.startsWith('http') ||
+        widget.video.path.startsWith('surah/');
+
+    if (isNetworkOrWeb) {
+      _controller = VideoPlayerController.networkUrl(Uri.base.resolve(widget.video.path))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {});
+            _controller.play();
+          }
+        });
+    } else {
+      _controller = VideoPlayerController.file(File(widget.video.path))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {});
+            _controller.play();
+          }
+        });
+    }
   }
 
   void _togglePlay() {

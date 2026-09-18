@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:myapp/models/video.dart';
 import 'package:myapp/models/book.dart';
@@ -12,35 +13,57 @@ class DataManager {
 
   Directory? _appDir;
 
+  static const Map<int, Map<int, String>> videoNamesMap = {
+    1: {1: "the opening", 2: "the win", 3: "almasad", 4: "the dedication", 10: "the afternoon"},
+    2: {5: "alfalaq", 8: "The Most Merciful", 11: "Leeches", 12: "the elephant", 13: "the alqadr", 15: "Quraysh"},
+    3: {5: "alfalaq", 6: "The people", 7: "figs", 9: "Alsharh", 14: "Alhumaza"},
+    4: {21: "the chair", 22: "The night", 23: "late morning", 24: "the earthquick", 25: "the plate"},
+    5: {26: "the property", 27: "The pencile", 28: "the Ascents", 29: "the highness", 30: "The Country"},
+    6: {16: "Luqman", 17: "The Most Merciful", 18: "the Star", 19: "the human", 20: "The Sun"},
+  };
+
+  static const Map<int, int> gradePageCounts = {
+    1: 56,
+    2: 64,
+    3: 72,
+    4: 72,
+    5: 96,
+    6: 92,
+  };
+
   Future<void> init() async {
+    if (kIsWeb) return;
     _appDir ??= await getApplicationDocumentsDirectory();
   }
 
   Future<bool> isGradeDownloaded(int grade) async {
+    if (kIsWeb) return true;
     if (_appDir == null) await init();
     final prefs = await SharedPreferences.getInstance();
-    // Check if the individual grade is marked as done or if "all" was previously done
     bool specific = prefs.getBool('grade_${grade}_downloaded') ?? false;
     bool all = prefs.getBool('data_downloaded_v3') ?? false;
     
-    // Also verify the folder actually exists
     final gradeDir = Directory('${_appDir!.path}/Surah/$grade');
     return (specific || all) && await gradeDir.exists();
   }
 
   Future<List<Video>> getVideosForGrade(int grade) async {
     final List<Video> videos = [];
+
+    if (kIsWeb) {
+      final names = videoNamesMap[grade] ?? {};
+      for (var entry in names.entries) {
+        videos.add(Video(
+          id: entry.key,
+          name: entry.value,
+          path: 'surah/$grade/${entry.key}.mp4',
+        ));
+      }
+      return videos;
+    }
+
     if (_appDir == null) await init();
     final root = '${_appDir!.path}/Surah';
-    
-    final videoNamesMap = {
-      1: {1: "the opening", 2: "the win", 3: "almasad", 4: "the dedication", 10: "the afternoon"},
-      2: {5: "alfalaq", 8: "The Most Merciful", 11: "Leeches", 12: "the elephant", 13: "the alqadr", 15: "Quraysh"},
-      3: {5: "alfalaq", 6: "The people", 7: "figs", 9: "Alsharh", 14: "Alhumaza"},
-      4: {21: "the chair", 22: "The night", 23: "late morning", 24: "the earthquick", 25: "the plate"},
-      5: {26: "the property", 27: "The pencile", 28: "the Ascents", 29: "the highness", 30: "The Country"},
-      6: {16: "Luqman", 17: "The Most Merciful", 18: "the Star", 19: "the human", 20: "The Sun"},
-    };
 
     final gradeDir = Directory('$root/$grade');
     if (await gradeDir.exists()) {
@@ -66,6 +89,15 @@ class DataManager {
   }
 
   Future<Book> getBookForGrade(int grade) async {
+    if (kIsWeb) {
+      final count = gradePageCounts[grade] ?? 0;
+      final pages = List.generate(
+        count,
+        (index) => 'surah/$grade/book1/1 (${index + 1}).jpg',
+      );
+      return Book(title: 'the book', pages: pages);
+    }
+
     if (_appDir == null) await init();
     final root = '${_appDir!.path}/Surah';
     Directory bookDir = Directory('$root/$grade/book1');
@@ -80,8 +112,10 @@ class DataManager {
 
     imagePaths.sort((a, b) {
       final re = RegExp(r'\((\d+)\)');
-      final mA = re.firstMatch(a.split(Platform.pathSeparator).last);
-      final mB = re.firstMatch(b.split(Platform.pathSeparator).last);
+      final lastPart = a.split(RegExp(r'[/\\]')).last;
+      final lastPartB = b.split(RegExp(r'[/\\]')).last;
+      final mA = re.firstMatch(lastPart);
+      final mB = re.firstMatch(lastPartB);
       if (mA != null && mB != null) return int.parse(mA.group(1)!).compareTo(int.parse(mB.group(1)!));
       return a.compareTo(b);
     });
@@ -91,3 +125,4 @@ class DataManager {
 
   Future<List<Sound>> getSoundsForGrade(int grade) async => [];
 }
+

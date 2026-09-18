@@ -44,3 +44,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 *.apk
+
+# Web media assets and uncompressed folders (extracted on CI during build)
+/web/surah/
+/sura/1/
+/sura/2/
+/sura/3/
+/sura/4/
+/sura/5/
+/sura/6/
