@@ -7,8 +7,9 @@ import 'dart:io';
 
 class VideoPlayerScreen extends StatefulWidget {
   final Video video;
+  final String? title;
 
-  const VideoPlayerScreen({super.key, required this.video});
+  const VideoPlayerScreen({super.key, required this.video, this.title});
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
@@ -70,8 +71,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(widget.video.name),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          widget.title ?? widget.video.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: Focus(
         autofocus: true,
@@ -102,7 +110,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   aspectRatio: _controller.value.aspectRatio,
                   child: VideoPlayer(_controller),
                 )
-              : const CircularProgressIndicator(),
+              : const CircularProgressIndicator(color: Colors.green),
         ),
       ),
       // 🔥 Restored the FloatingActionButton that you previously had
